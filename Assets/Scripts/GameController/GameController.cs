@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts.GameController
 {
@@ -13,19 +14,37 @@ namespace Assets.Scripts.GameController
         public GameObject obstacle;
         public Transform spawnLocation;
         public float y = 4.5f;
+        public float firstSpawnAfter;
+        public float spawnTime;
 
         [Header("Score")]
         public int score;
         public Text textScore;
+        public bool startWithZero = false;
+
+        [Header("Game Over")]
+        public GameObject gameOverUI;
 
         public static GameController instance;
 
-        //-4.5, 4.5
+        private void Awake()
+        {
+            instance = this;
+        }
 
         void Start()
         {
-            instance = this;
-            InvokeRepeating("SpawnObstacle", 1f, 2f);
+            if(PlayerPrefs.GetInt("score") > 0 && !this.startWithZero)
+            {
+                this.score = PlayerPrefs.GetInt("score");
+            } else if(this.startWithZero)
+            {
+                this.score = 0;
+            }
+            this.UpdateScoreUI();
+
+            InvokeRepeating("SpawnObstacle", firstSpawnAfter, spawnTime);
+            Time.timeScale = 1;
         }
 
         private void Update()
@@ -59,17 +78,30 @@ namespace Assets.Scripts.GameController
         public void GameOver()
         {
             Debug.Log("Game over já era");
+            Time.timeScale = 0;
+            gameOverUI.SetActive(true);
         }
 
-        public void SetPoint(int value)
+        public void SetScore(int value)
         {
             this.score += value;
             UpdateScoreUI();
+            PlayerPrefs.SetInt("score", this.score);
         }
 
         public void UpdateScoreUI()
         {
             this.textScore.text = "Score: " + this.score.ToString();
+        }
+
+        public void RestartGame()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        public void ExitGame()
+        {
+            SceneManager.LoadScene(0);
         }
 
     }

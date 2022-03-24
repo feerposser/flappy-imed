@@ -11,7 +11,7 @@ public class AddScoreCollision : MonoBehaviour
     {
         if(collision.gameObject.tag == "Player")
         {
-            GameController.instance.SetPoint(score);
+            GameController.instance.SetScore(score);
         }
     }
 
